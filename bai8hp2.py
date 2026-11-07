@@ -3,7 +3,7 @@ import tkinter as tk
 from tkinter import messagebox
 
 # Database
-conn = sqlite3.connect('shop.db')
+conn = sqlite3.connect('shop1.db')
 cursor = conn.cursor()
 cursor.execute('''
 CREATE TABLE IF NOT EXISTS products (
@@ -16,15 +16,22 @@ CREATE TABLE IF NOT EXISTS products (
 conn.commit()
 current_products = [] 
 # Def 
+def display_products():
+    listbox.delete(0, tk.END)
+    cursor.execute('SELECT * FROM products')
+    products = cursor.fetchall()
+
+        
+
 def add_product():
     name = entry_name.get().strip()
-    price = entry_price.get().strip()
-    quantity = entry_quantity.get().strip()
+    price = float(entry_price.get())
+    quantity = int(entry_quantity.get())
     if name=="" or price=="" or quantity=="":
         messagebox.showwarning("Error", "Please fill in all fields.")
         return
-    if price<0 or quantity<0:
-        messagebox.showwarning("Error", "Price and quantity must be non-negative.")
+    if price<=0 or quantity<=0:
+        messagebox.showwarning("Error", "Price and quantity must be positive.")
         return
     cursor.execute('''INSERT INTO products (name, price, quantity) VALUES (?, ?, ?)''',
                 (name.strip(), float(price), int(quantity)))
@@ -47,6 +54,7 @@ title = tk.Label(
 )
 title.pack(pady=15)
 
+
 tk.Label(root, text="Name product:",font=("Arial", 14)).pack()
 entry_name= tk.Entry(root, font=("Arial", 14),width=30)
 entry_name.pack(pady=5)
@@ -61,4 +69,7 @@ entry_quantity.pack(pady=5)
 
 button_add = tk.Button(root, text="Add Product", font=("Arial", 14), width=20,
                         command=add_product).pack(pady=5)
+
+listbox = tk.Listbox(root, font=("Arial", 14), width=50)
+listbox.pack(pady=10)
 root.mainloop()  
