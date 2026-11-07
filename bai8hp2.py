@@ -14,14 +14,19 @@ CREATE TABLE IF NOT EXISTS products (
 )
 ''')
 conn.commit()
-current_products = [] 
 # Def 
 def display_products():
     listbox.delete(0, tk.END)
     cursor.execute('SELECT * FROM products')
     products = cursor.fetchall()
+    for p in products:
+        p_id = p[0]
+        p_name = p[1]
+        p_price = p[2]
+        p_quantity = p[3]
 
-        
+        text = f"ID: {p_id} | Name: {p_name} | Price: {p_price} | Quantity: {p_quantity}"
+        listbox.insert(tk.END, text)
 
 def add_product():
     name = entry_name.get().strip()
@@ -39,8 +44,21 @@ def add_product():
     entry_name.delete(0, tk.END)
     entry_price.delete(0, tk.END)
     entry_quantity.delete(0, tk.END)
+    display_products()
     messagebox.showinfo("Success", "Product added successfully.")
 
+def delete_product():
+    selected = listbox.curselection()
+    if not selected:
+        messagebox.showwarning("Error", "Please select a product to delete.")
+        return
+    index = selected[0]
+    product_text = listbox.get(index)
+    product_id = int(product_text.split('|')[0].split(':')[1].strip())
+    cursor.execute('DELETE FROM products WHERE id=?', (product_id,))
+    conn.commit()
+    display_products()
+    messagebox.showinfo("Success", "Product deleted successfully.")
 # Tkinter GUI
 root = tk.Tk()
 root.title("Product Management")
@@ -70,6 +88,12 @@ entry_quantity.pack(pady=5)
 button_add = tk.Button(root, text="Add Product", font=("Arial", 14), width=20,
                         command=add_product).pack(pady=5)
 
-listbox = tk.Listbox(root, font=("Arial", 14), width=50)
+listbox = tk.Listbox(root, font=("Arial", 14), width=50, height=5)
 listbox.pack(pady=10)
+
+button_delete1 = tk.Button(root, text="Delete Product", font=("Arial", 14),
+                            width=20, command=delete_product).pack(pady=5)
+
+display_products()
+
 root.mainloop()  
